@@ -236,7 +236,7 @@ function LocalWeather({ setWeather, setLocation, setError }) {
                         );
                     }
                     const locationNameData = await locationNameRes.json();
-                    console.log(locationNameData);
+
                     setLocation(
                         `${
                             locationNameData.address.town ??
