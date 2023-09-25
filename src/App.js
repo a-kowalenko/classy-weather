@@ -225,15 +225,6 @@ function LocalWeather({ setWeather, setLocation, setError }) {
                 try {
                     setError("");
                     setIsLoading(true);
-                    const timezoneRes = await fetch(
-                        `/api/Time/current/coordinate?latitude=${lat}&longitude=${lng}`
-                    );
-                    if (!timezoneRes.ok) {
-                        throw new Error(
-                            "Something went wrong with fetching the current timezone"
-                        );
-                    }
-                    const timezoneData = await timezoneRes.json();
 
                     const locationNameRes = await fetch(
                         `https://geocode.maps.co/reverse?lat=${lat}&lon=${lng}`,
@@ -255,8 +246,11 @@ function LocalWeather({ setWeather, setLocation, setError }) {
                         )}`
                     );
 
+                    const timezone =
+                        Intl.DateTimeFormat().resolvedOptions().timeZone;
+
                     const weatherRes = await fetch(
-                        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&timezone=${timezoneData.timeZone}&daily=weathercode,temperature_2m_max,temperature_2m_min`
+                        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&timezone=${timezone}&daily=weathercode,temperature_2m_max,temperature_2m_min`
                     );
 
                     if (!weatherRes.ok) {
