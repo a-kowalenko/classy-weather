@@ -226,7 +226,8 @@ function LocalWeather({ setWeather, setLocation, setError }) {
                     setError("");
                     setIsLoading(true);
                     const timezoneRes = await fetch(
-                        `https://timeapi.io/api/Time/current/coordinate?latitude=${lat}&longitude=${lng}`
+                        `https://timeapi.io/api/Time/current/coordinate?latitude=${lat}&longitude=${lng}`,
+                        { mode: "cors" }
                     );
                     if (!timezoneRes.ok) {
                         throw new Error(
