@@ -226,18 +226,7 @@ function LocalWeather({ setWeather, setLocation, setError }) {
                     setError("");
                     setIsLoading(true);
                     const timezoneRes = await fetch(
-                        `/api/Time/current/coordinate?latitude=${lat}&longitude=${lng}`,
-                        {
-                            method: "GET",
-                            mode: "cors",
-                            headers: {
-                                "Access-Control-Allow-Origin": "*",
-                                "Access-Control-Allow-Methods":
-                                    "GET, POST, PUT, DELETE, PATCH, OPTIONS",
-                                "Access-Control-Allow-Headers":
-                                    "X-Requested-With, content-type, Authorization",
-                            },
-                        }
+                        `/api/Time/current/coordinate?latitude=${lat}&longitude=${lng}`
                     );
                     if (!timezoneRes.ok) {
                         throw new Error(
