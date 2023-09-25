@@ -226,7 +226,7 @@ function LocalWeather({ setWeather, setLocation, setError }) {
                     setError("");
                     setIsLoading(true);
                     const timezoneRes = await fetch(
-                        `http://api.geonames.org/timezoneJSON?lat=${lat}&lng=${lng}&username=gsr.andy`
+                        `https://timeapi.io/api/Time/current/coordinate?latitude=${lat}&longitude=${lng}`
                     );
                     if (!timezoneRes.ok) {
                         throw new Error(
