@@ -250,7 +250,7 @@ function LocalWeather({ setWeather, setLocation, setError }) {
                         `${
                             locationNameData.address.town ??
                             locationNameData.address.county
-                        } ${convertToFlag(timezoneData.countryCode)}`
+                        } ${convertToFlag(timezoneData.timeZone)}`
                     );
 
                     const weatherRes = await fetch(
