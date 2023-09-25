@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useGeolocation } from "./useGeolocation";
 
 function getWeatherIcon(wmoCode) {
     const icons = new Map([
@@ -101,6 +102,8 @@ export default function App() {
                 }
             }
 
+            localStorage.setItem("location", search);
+
             if (search.length < 2) {
                 setError("");
                 setWeather({});
@@ -108,7 +111,6 @@ export default function App() {
             }
 
             fetchWeatherData();
-            localStorage.setItem("location", search);
 
             return function () {
                 geoController.abort();
@@ -126,6 +128,14 @@ export default function App() {
             {isLoading && !error && <Loader />}
 
             {error && <ErrorMessage message={error} />}
+
+            {!isLoading && !error && !weather.weathercode && (
+                <LocalWeather
+                    setError={setError}
+                    setLocation={setDisplayLocation}
+                    setWeather={setWeather}
+                />
+            )}
 
             {weather.weathercode && !error && !isLoading && (
                 <WeatherList weather={weather} location={displayLocation} />
@@ -198,6 +208,85 @@ function Day(props) {
                 <strong>{Math.ceil(max)}&deg;C</strong>
             </p>
         </li>
+    );
+}
+
+function LocalWeather({ setWeather, setLocation, setError }) {
+    const [isLoading, setIsLoading] = useState(false);
+    const { isLoading: isLoadingGeo, position, getLocation } = useGeolocation();
+    const { lat, lng } = position;
+
+    useEffect(
+        function () {
+            async function getCurrentPosition() {
+                if (!lat || !lng) {
+                    return;
+                }
+                try {
+                    setError("");
+                    setIsLoading(true);
+                    const timezoneRes = await fetch(
+                        `http://api.geonames.org/timezoneJSON?lat=${lat}&lng=${lng}&username=gsr.andy`
+                    );
+                    if (!timezoneRes.ok) {
+                        throw new Error(
+                            "Something went wrong with fetching the current timezone"
+                        );
+                    }
+                    const timezoneData = await timezoneRes.json();
+
+                    const locationNameRes = await fetch(
+                        `https://geocode.maps.co/reverse?lat=${lat}&lon=${lng}`,
+                        { mode: "cors" }
+                    );
+                    if (!locationNameRes.ok) {
+                        throw new Error(
+                            "Something went wrong with fetching the current location data"
+                        );
+                    }
+                    const locationNameData = await locationNameRes.json();
+
+                    setLocation(
+                        `${
+                            locationNameData.address.town ??
+                            locationNameData.address.county
+                        } ${convertToFlag(timezoneData.countryCode)}`
+                    );
+
+                    const weatherRes = await fetch(
+                        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&timezone=${timezoneData.timezoneId}&daily=weathercode,temperature_2m_max,temperature_2m_min`
+                    );
+
+                    if (!weatherRes.ok) {
+                        throw new Error(
+                            "Something went wrong with fetching weather"
+                        );
+                    }
+
+                    const weatherData = await weatherRes.json();
+                    setWeather(weatherData.daily);
+                } catch (err) {
+                    setError(err.message);
+                } finally {
+                    setIsLoading(false);
+                }
+            }
+
+            getCurrentPosition();
+        },
+        [lat, lng, setWeather, setLocation, setError]
+    );
+
+    return (
+        <button
+            className="cur-location-btn"
+            onClick={getLocation}
+            disabled={isLoading || isLoadingGeo}
+        >
+            {isLoadingGeo && "loading current location"}
+            {isLoading && "loading weather..."}
+            {!isLoading && !isLoadingGeo && "or show the weather in your area"}
+        </button>
     );
 }
 
