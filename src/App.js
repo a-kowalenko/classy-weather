@@ -235,8 +235,6 @@ function LocalWeather({ setWeather, setLocation, setError }) {
                     }
                     const timezoneData = await timezoneRes.json();
 
-                    console.log(timezoneData);
-
                     const locationNameRes = await fetch(
                         `https://geocode.maps.co/reverse?lat=${lat}&lon=${lng}`,
                         { mode: "cors" }
@@ -247,12 +245,14 @@ function LocalWeather({ setWeather, setLocation, setError }) {
                         );
                     }
                     const locationNameData = await locationNameRes.json();
-
+                    console.log(locationNameData);
                     setLocation(
                         `${
                             locationNameData.address.town ??
                             locationNameData.address.county
-                        } ${convertToFlag(timezoneData.timeZone)}`
+                        } ${convertToFlag(
+                            locationNameData.address.country_code
+                        )}`
                     );
 
                     const weatherRes = await fetch(
